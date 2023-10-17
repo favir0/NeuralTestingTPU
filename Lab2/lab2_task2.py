@@ -65,12 +65,19 @@ class Neuron():
     def calc_derivative(self):
         return 1
 
-    def train_neuron(self):
+    def train_neuron(self, new_input = []):
+        if (len(new_input) != 0):
+            print("before", len(self.inp))
+            self.inp = new_input.copy()
+            print("after", len(self.inp))
+
         complete_train = False
         max_point = 100
         time0 = time.perf_counter()
         while not complete_train:
             allAnswersRight = True
+            # to do ERROR with value to find, it still has small range
+            # need to update this thing to with input
             for i, result in enumerate(self.value_to_find):
                 # Текущее значение функции
                 curAnswer = self.solve_task(i)
@@ -110,6 +117,49 @@ def flattenNumberList(numberList):
             temp.extend(x if isinstance(x, list) else [x])
         return temp
 
+def continue_neuron_train(neuron, train_data, amount = 100):
+    print("Amount of numbers to be included in train session: ", amount)
+    flatten_train_images = []
+    for image in train_data["images"][0:amount]:
+        flatten_train_images.append(flattenNumberList(image))
+    print(len(flatten_train_images))
+    neuron.train_neuron(flatten_train_images)
+    return neuron
+
+def check_random_numbers(neuron, chosen_number,test_data):
+        successRate = 0
+        totalCount = 0
+        successCount = 0
+        while(True):
+            #input("Введите любое значение, чтобы проверить случайную цифру тестовой выборки")
+            totalCount += 1
+            image, image_label = get_random_test_number(test_data)
+            #plt.imshow(image, cmap="gray")
+            #plt.show()
+            #time.sleep(1)
+            #plt.close('all')
+            flattenImage = flattenNumberList(image)
+            print("Got random image of ", image_label)
+            print("Trying to identify is given random image a ", chosen_number, " or not...")
+            neuroResult = neuron.solve_specific_task(flattenImage)
+            if (image_label == chosen_number and neuroResult == 1):
+                print("Success, random image is a ", chosen_number, f"| {chosen_number} == {image_label}")
+                successCount += 1
+            elif (image_label != chosen_number and neuroResult == 0):
+                print ("Success, random image is not a", chosen_number, f"| {chosen_number} != {image_label}")
+                successCount += 1
+            else:
+                print ("Something went wrong...")
+                print ("Chosen number for neuron is ", chosen_number)
+                print ("Random number is ", image_label)
+                print ("Neruon result is", neuroResult)
+            successRate = successCount / totalCount * 100
+            print( "------------------------------------")
+            print(f"| Total numbers checked = {totalCount} |")
+            print(f"| Successfully checked = {successCount} |")
+            print(f"| Success rate = {successRate}% |")
+            print( "------------------------------------")
+
 def main():
     train_data, test_data = load_data()
     flattenNumbers = []
@@ -124,55 +174,28 @@ def main():
         weights.append(random.random())
 
     # Заполняем массив ответов, 1 у выбранной цифры и 0 у прочих  
-    chosenNumber = 2  
-    answers = get_answers_list(chosenNumber)
+    chosen_number = 2  
+    answers = get_answers_list(chosen_number)
     lr = 0.01
     print(answers)
     print("Learning rate: ", lr)
-    neronchik = Neuron(weights, answers, lr, flattenNumbers)
+    neuronchik = Neuron(weights, answers, lr, flattenNumbers)
     
     # Обучение нейрона
-    neronchik.train_neuron()
+    neuronchik.train_neuron()
 
     print("Проверка правильности обучения на исходных данных: ")
     for i in range (10):
         print ("Checking number ", i)
-        if (answers[i] == neronchik.solve_task(i)):
+        if (answers[i] == neuronchik.solve_task(i)):
             print("Success")
         else:
             print("Error")
+    continue_neuron_train(neuronchik, train_data, amount=len(train_data["images"]))
+    check_random_numbers(neuronchik, chosen_number, test_data)
 
-    successRate = 0
-    totalCount = 0
-    successCount = 0
-    while(True):
-        #input("Введите любое значение, чтобы проверить случайную цифру тестовой выборки")
-        totalCount += 1
-        image, image_label = get_random_test_number(test_data)
-        #plt.imshow(image, cmap="gray")
-        #plt.show()
-        #time.sleep(1)
-        #plt.close('all')
-        flattenImage = flattenNumberList(image)
-        print("Got random image of ", image_label)
-        print("Trying to identify is given random image a ", chosenNumber, " or not...")
-        neuroResult = neronchik.solve_specific_task(flattenImage)
-        if (image_label == chosenNumber and neuroResult == 1):
-            print("Success, random image is a ", chosenNumber, f"| {chosenNumber} == {image_label}")
-            successCount += 1
-        elif (image_label != chosenNumber and neuroResult == 0):
-            print ("Success, random image is not a", chosenNumber, f"| {chosenNumber} != {image_label}")
-            successCount += 1
-        else:
-            print ("Something went wrong...")
-            print ("Chosen number for neuron is ", chosenNumber)
-            print ("Random number is ", image_label)
-            print ("Neruon result is", neuroResult)
-        successRate = successCount / totalCount * 100
-        print( "------------------------------------")
-        print(f"| Total numbers checked = {totalCount} |")
-        print(f"| Successfully checked = {successCount} |")
-        print(f"| Success rate = {successRate}% |")
-        print( "------------------------------------")
+
+    
+    
 if __name__ == "__main__":
     main()
