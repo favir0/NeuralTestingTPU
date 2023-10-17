@@ -1,6 +1,5 @@
-from keras.datasets import mnist
-import numpy as np
 from tqdm import tqdm
+import numpy as np
 import math
 from abc import ABC, abstractmethod
 
@@ -55,22 +54,6 @@ class Neuron():
                 break
             complete_train = allAnswersRight
 
-
-
-# Считывание данных
-def load_data():
-    (X_train, y_train), (X_test, y_test) = mnist.load_data()
-
-    data = {}
-    data['images'] = np.array(X_train, dtype='float32')
-    data['labels'] = np.array(y_train, dtype='float32')
-
-    testData = {}
-    testData['images'] = np.array(X_test, dtype='float32')
-    testData['labels'] = np.array(y_test, dtype='float32')
-
-    print("Количество изображений в обучающей выборке: ", len(X_train))
-    return data, testData
 
 
 def main():
