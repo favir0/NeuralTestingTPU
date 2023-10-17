@@ -1,3 +1,4 @@
 tensorflow==2.14.*
 keras==2.14.*
 tqdm==4.66.*
+matplotlib==3.8.*

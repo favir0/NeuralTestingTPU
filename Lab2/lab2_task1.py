@@ -2,6 +2,7 @@ from tqdm import tqdm
 import numpy as np
 import math
 from abc import ABC, abstractmethod
+import random
 
 class Neuron():
     def __init__(self, weights, value_to_find, learning_rate, inp):
@@ -57,7 +58,7 @@ class Neuron():
 
 
 def main():
-    startWeights = [0.1, 0.1]
+    startWeights = [random.random(), random.random()]
     inp = [[0,0],
            [0,1],
            [1,0],
